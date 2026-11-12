@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "Fama-Gestion",
+  "short_name": "Fama",
+  "description": "Votre budget personnel en FCFA, vos projets et vos remboursements.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f7f9",
+  "theme_color": "#17151e",
+  "categories": ["finance", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

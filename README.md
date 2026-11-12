@@ -30,6 +30,14 @@ npm run lint
 npm run build
 ```
 
+## Publication et installation sur téléphone
+
+Chaque push sur `main` lance le workflow GitHub Actions `.github/workflows/deploy.yml`. Dans les paramètres du dépôt, sélectionnez **Settings → Pages → Build and deployment → Source: GitHub Actions**. Une fois le workflow terminé, l'application est publiée à l'adresse :
+
+<https://lskfama93.github.io/Fama-Gestion/>
+
+Ouvrez cette adresse sur le téléphone après la publication. Sur Android, utilisez le menu du navigateur puis **Installer l'application** ou **Ajouter à l'écran d'accueil**. Sur iPhone/iPad, ouvrez le site dans Safari, touchez **Partager**, puis **Sur l'écran d'accueil**. Après le premier chargement, l'interface et ses ressources statiques restent disponibles hors ligne ; les données personnelles restent dans le stockage local du téléphone. Aucun fichier APK n'est fourni.
+
 ## Stockage et confidentialité
 
 Les transactions, projets et emprunts sont enregistrés dans `localStorage` sous la clé `fama-gestion-data-v2`. Ils restent sur le navigateur et l'appareil utilisés ; ils ne sont ni synchronisés ni sauvegardés sur un serveur. Effacer les données du site dans le navigateur les supprimera. Les anciennes données en euros (`fama-gestion-data-v1`) sont converties en XOF lors de leur migration et leur clé est ensuite supprimée. Les données d'exemple initiales sont fournies pour explorer l'interface et peuvent être supprimées.

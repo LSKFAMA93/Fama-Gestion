@@ -121,6 +121,9 @@ function App() {
   const [fundGoal, setFundGoal] = useState(null)
   const [loanModal, setLoanModal] = useState(false)
   const [repaymentLoan, setRepaymentLoan] = useState(null)
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [installHelp, setInstallHelp] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(() => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true)
   const [filterType, setFilterType] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterPeriod, setFilterPeriod] = useState('month')
@@ -133,6 +136,26 @@ function App() {
       // The app remains usable for this session if storage is blocked.
     }
   }, [data])
+
+  useEffect(() => {
+    if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL }).catch(() => {})
+    }
+    const handleInstallPrompt = (event) => {
+      event.preventDefault()
+      setInstallPrompt(event)
+    }
+    const handleInstalled = () => {
+      setIsInstalled(true)
+      setInstallPrompt(null)
+    }
+    window.addEventListener('beforeinstallprompt', handleInstallPrompt)
+    window.addEventListener('appinstalled', handleInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleInstallPrompt)
+      window.removeEventListener('appinstalled', handleInstalled)
+    }
+  }, [])
 
   const monthTransactions = useMemo(
     () => data.transactions.filter((item) => item.date.startsWith(month)),
@@ -271,6 +294,17 @@ function App() {
     setTransactionModal(item ?? { type: 'expense', date: new Date().toISOString().slice(0, 10) })
   }
 
+  async function installApp() {
+    if (!installPrompt) {
+      setInstallHelp(true)
+      return
+    }
+    await installPrompt.prompt()
+    const choice = await installPrompt.userChoice
+    setInstallPrompt(null)
+    if (choice.outcome === 'accepted') setIsInstalled(true)
+  }
+
   return (
     <div className="app-shell" data-theme={theme}>
       <aside className="sidebar">
@@ -298,6 +332,7 @@ function App() {
           <div className="breadcrumb">Mon espace <span>/</span> <strong>{page === 'dashboard' ? 'Vue d’ensemble' : page === 'transactions' ? 'Transactions' : page === 'projects' ? 'Mes projets' : 'Mes emprunts'}</strong></div>
           <div className="topbar-actions">
             <label className="month-picker"><span className="sr-only">Mois affiché</span><input type="month" value={month} onChange={(event) => setMonth(event.target.value)} /><span className="month-label">{formatMonth(month)}</span></label>
+            {!isInstalled && <button className="install-button" type="button" onClick={installApp} title="Installer Fama-Gestion" aria-label="Installer Fama-Gestion"><span aria-hidden="true">↓</span><span className="install-label">Installer</span></button>}
             <button className="theme-toggle" type="button" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Activer le thème sombre' : 'Activer le thème clair'} title="Changer de thème">◐</button>
           </div>
         </header>
@@ -368,6 +403,12 @@ function App() {
         <label>Montant à ajouter (FCFA)<input name="amount" type="number" min="1" step="1" required placeholder="25 000" autoFocus /></label>
         <div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setFundGoal(null)}>Annuler</button><button className="primary-button" type="submit">Ajouter au projet</button></div>
       </form></Modal>}
+
+      {installHelp && <Modal title="Installer Fama-Gestion" onClose={() => setInstallHelp(false)}><div className="install-guide">
+        <section><h3>Android</h3><p>Ouvrez le menu de votre navigateur, puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».</p></section>
+        <section><h3>iPhone ou iPad</h3><p>Ouvrez cette page dans Safari, touchez « Partager », puis « Sur l’écran d’accueil ».</p></section>
+        <p className="install-privacy">Vos données de budget restent enregistrées sur cet appareil.</p>
+      </div></Modal>}
     </div>
   )
 }
